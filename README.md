@@ -22,14 +22,23 @@ I initially followed along with the STM8SVLDISCOVERY discovery board tutorial to
 
 The printed circuit board was designed using KiCAD, the Gerber files can be found at 
 
-`insert gerber file location later`
+> [Gerber File Location](Gerbers/)
 
 ## Technical Information
-### Electrical Schematic 
+### PCB Development
 
+#### Electrical Schematic 
 
 <img src="img/heart_sch.png" width="100%">
 
-### PCB Board Layout
+#### PCB Board Layout
 
 <img src="img/heart_pcb.png" width="100%">
+
+### Software Development
+
+The STM8S003K3 MCU is programmed to blink the 4 display LEDS(2-5) to display a message in half-bit binary at 0.5 Hz frequency. Below is an explaination on how it does this.
+
+
+
+
