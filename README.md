@@ -45,7 +45,7 @@ The STM8S003K3 MCU is programmed to blink the 4 display LEDS(2-5) to display a m
 * These are now inserted into a bitArray, which is of length 2*length(message)
 
 
-<img src="img/char2bin.png" width="100% >
+<img src="img/char2bin.png" width="100%" >
 
 
 * Once the bitArray is fully built it proceeds to the main loop of LED control
