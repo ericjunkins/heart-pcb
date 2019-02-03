@@ -44,13 +44,14 @@ The STM8S003K3 MCU is programmed to blink the 4 display LEDS(2-5) to display a m
 * The high byte and low byte will be switched, because humans read binary starting at the 0th bit, which is the right most bit, so we will want to switch high/low to make more sense to us
 * These are now inserted into a bitArray, which is of length 2*length(message)
 
-<img src="img/char2bin.png" width="100%">
+
+<img src="img/char2bin.png" width="100% >
 
 
 * Once the bitArray is fully built it proceeds to the main loop of LED control
 * Each element of the bitArray is taken and each individual bit is then used to turn on/off an LED. Again because humans read right o left the LED1 (left-most on the PCB) corresponds to bit0, and LED4 (right-most on the PCB) corresponds to bit3
 
-<img src="img/string2led.png" width="100%">
+<img src="img/string2leds.png" width="100%">
 
 
 
