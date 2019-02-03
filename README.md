@@ -3,7 +3,7 @@
 ## Project Information
 Heart PCB is a device that uses a STM8S003K3 Microchip to do bit-level control of a set of LEDs to display an input message in half-byte binary
 
-<img src="img/board_cap.png" width="100%" >
+<img src="img/board_cap.PNG" width="100%" >
 
 
 ### Software utilites
