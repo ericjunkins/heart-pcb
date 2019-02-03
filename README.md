@@ -26,3 +26,10 @@ The printed circuit board was designed using KiCAD, the Gerber files can be foun
 
 ## Technical Information
 ### Electrical Schematic 
+
+
+<img src="img/heart_sch.png" width="100%">
+
+### PCB Board Layout
+
+<img src="img/heart_pcb.png" width="100%">
