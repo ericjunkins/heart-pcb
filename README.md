@@ -39,6 +39,18 @@ The printed circuit board was designed using KiCAD, the Gerber files can be foun
 
 The STM8S003K3 MCU is programmed to blink the 4 display LEDS(2-5) to display a message in half-bit binary at 0.5 Hz frequency. Below is an explaination on how it does this.
 
+* Loop through the char * message and look at each individual char. 
+* Each char is an 8 bit sequence, which will first be broken down into a "high byte" and "low byte". These are really a high half-byte and low half-byte as they are only 4 bits each. 
+* The high byte and low byte will be switched, because humans read binary starting at the 0th bit, which is the right most bit, so we will want to switch high/low to make more sense to us
+* These are now inserted into a bitArray, which is of length 2*length(message)
+
+<img src="img/char2bin.png" width="100%">
+
+
+* Once the bitArray is fully built it proceeds to the main loop of LED control
+* Each element of the bitArray is taken and each individual bit is then used to turn on/off an LED. Again because humans read right o left the LED1 (left-most on the PCB) corresponds to bit0, and LED4 (right-most on the PCB) corresponds to bit3
+
+<img src="img/string2led.png" width="100%">
 
 
 
