@@ -1,110 +1,174 @@
-/******************************************************************************
+/**
+  ******************************************************************************
+  * @file main.c
+  * @brief This file contains the main function for Discover example.
+  * @author STMicroelectronics - MCD Application Team
+  * @version V1.0.0
+  * @date 24/11/2011
+  ******************************************************************************
+  *
+  * THE PRESENT FIRMWARE WHICH IS FOR GUIDANCE ONLY AIMS AT PROVIDING CUSTOMERS
+  * WITH CODING INFORMATION REGARDING THEIR PRODUCTS IN ORDER FOR THEM TO SAVE
+  * TIME. AS A RESULT, STMICROELECTRONICS SHALL NOT BE HELD LIABLE FOR ANY
+  * DIRECT, INDIRECT OR CONSEQUENTIAL DAMAGES WITH RESPECT TO ANY CLAIMS ARISING
+  * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
+  * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
+  * FOR MORE INFORMATION PLEASE READ CAREFULLY THE LICENSE AGREEMENT FILE LOCATED 
+  * IN THE ROOT DIRECTORY OF THIS FIRMWARE PACKAGE.
+  *
+  * <h2><center>&copy; COPYRIGHT 2009 STMicroelectronics</center></h2>
+  * @image html logo.bmp
+  ******************************************************************************
+  */
 
-                            Online C Compiler.
-                Code, Compile, Run and Debug C program online.
-Write your code in this editor and press "Run" button to compile and execute it.
+/* Includes ------------------------------------------------------------------*/
+#include "stm8s.h"
+#include "main.h"
 
-*******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <errno.h>
 
-#define HIGH_MASK  0xF0
-#define LOW_MASK   0x0F
+/**
+  * @addtogroup TIM4_TimeBase_InterruptConfiguration
+  * @{
+  */
 
-#define D1_MASK    0x01
-#define D2_MASK    0x02
-#define D3_MASK    0x04
-#define D4_MASK    0x08
+/* Private typedef -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+volatile bool User_Key_Pressed = 0;
+u8 BlinkSpeed = 6;
+u8 Counter;
+u8 PeriodNumber = 0;
+char *message = "Iloveyou";
+int bitArr[8];
+int test[8];
 
-char *stringToBinary(char *s)
+char *ptr;
+int i;
+
+/* Private function prototypes -----------------------------------------------*/
+/* Private functions ---------------------------------------------------------*/
+void TIMER_Configuration(void);
+void Delay (int nCount);
+void bin_to_led(int);
+void Turn_On_Sequence(void);
+/* Public functions ----------------------------------------------------------*/
+/**
+  * @brief Example firmware main entry point.
+  * @par Parameters:
+  * None
+  * @retval
+  * None
+  */
+void main(void)
 {
-  if (s == NULL) {
-    // NULL might be 0 but you cannot be sure about it
-    return NULL;
-  }
-  // get length of string without NUL
-  size_t slen = strlen(s);
-  // we cannot do that here, why?
-  // if(slen == 0){ return s;}
-  errno = 0;
-  // allocate "slen" (number of characters in string without NUL)
-  // times the number of bits in a "char" plus one byte for the NUL
-  // at the end of the return value
-  char *binary = malloc(slen * CHAR_BIT + 1);
-  if(binary == NULL){
-     fprintf(stderr,"malloc has failed in stringToBinary(%s): %s\n",s, strerror(errno));
-     return NULL;
-  }
-  // finally we can put our shortcut from above here
+
+  /* Configure PD0 (LED1) as output push-pull low (led switched on) */
+  GPIO_Init(LED_PORT, LED_PIN_0, GPIO_MODE_OUT_PP_LOW_FAST);
+	GPIO_Init(LED_PORT, LED_PIN_1, GPIO_MODE_OUT_PP_LOW_FAST);
+	GPIO_Init(LED_PORT, LED_PIN_2, GPIO_MODE_OUT_PP_LOW_FAST);
+	GPIO_Init(LED_PORT, LED_PIN_3, GPIO_MODE_OUT_PP_LOW_FAST);
+  /* Configure PC4 (push buton) as input floating */
+  GPIO_Init(BUTTON_PORT, BUTTON_PIN, GPIO_MODE_IN_PU_IT);
+
   
-  if (slen == 0) {
-    *binary = '\0';
-    return binary;
+	for(ptr = message; *ptr != '\0'; ptr++){
+		test[i+1] = *ptr & LOW_MASK;
+		test[i]   = (*ptr & HIGH_MASK) >> 4;
+		i+=2;
+	}
+	
+	Turn_On_Sequence();
+	
+  while (1)
+  {
+		for(i=0;i<sizeof(test);i++){
+			bin_to_led(test[i]);
+			Delay(0xFFFFF);
+			Delay(0xFFFFF);
+			GPIO_Write(LED_PORT, 0xFF);
+			Delay(0xFFFFF);
+		}
   }
-  char *ptr;
-  // keep an eye on the beginning
-  char *start = binary;
-  int i;
-
-  // loop over the input-characters
-  for (ptr = s; *ptr != '\0'; ptr++) {
-    /* perform bitwise AND for every bit of the character */
-    // loop over the input-character bits
-    for (i = CHAR_BIT - 1; i >= 0; i--, binary++) {
-      *binary = (*ptr & 1 << i) ? '1' : '0';
-    }
-  }
-  // finalize return value
-  *binary = '\0';
-  // reset pointer to beginning
-  binary = start;
-  return binary;
 }
 
-int* strToBinArray(char * s, int *arr){
-    char *ptr;
-    int i = 0;
-    
-    for(ptr = s; *ptr != '\0'; ptr++){
-        int temp_high = *ptr & HIGH_MASK;
-        int temp_low  = *ptr & LOW_MASK;
-        arr[i]   = temp_low;
-        arr[i+1] = temp_high >> 4;
-        i+=2;
-    }
-    return arr;
-}
 
-void flipLEDs(int *arr){
-    int led1;
-    int led2; 
-    int led3;
-    int led4;
-    
-    for(int j =0; j<sizeof(arr); j++){
-        led1 = (arr[j] & D1_MASK) >> 0;
-        led2 = (arr[j] & D2_MASK) >> 1;
-        led3 = (arr[j] & D3_MASK) >> 2;
-        led4 = (arr[j] & D4_MASK) >> 3;
-        printf("LED output is: %d, %d, %d, %d \n", led1,led2,led3,led4);
-    }
-    
-}
-
-int main(int argc, char **argv)
+void Delay(int nCount)
 {
-  char *output;
-  char *message = "Iloveyou";
-  size_t slen = strlen(message);
-  int bitArr[slen*2];
- 
-  printf("%s\n", stringToBinary(message));
-  
-  int* led = strToBinArray(message, bitArr);
-  flipLEDs(led); 
-
-  exit(EXIT_SUCCESS);
+  /* Decrement nCount value */
+  while (nCount != 0)
+  {
+    nCount--;
+  }
 }
+
+
+void Turn_On_Sequence(void){
+	
+	// I know i need to use timers and ISR to do this, but couldn't figure it out
+	
+	GPIO_Write(LED_PORT, 0xFF);
+	Delay(0xFFFFF);
+	GPIO_Write(LED_PORT, 0x00);
+	Delay(0xFFFFF);
+	GPIO_Write(LED_PORT, 0xFF);
+	Delay(0xFFFFF);
+	GPIO_Write(LED_PORT, 0x00);
+	Delay(0xFFFFF);
+	GPIO_Write(LED_PORT, 0xFF);
+	Delay(0xFFFFF);
+	GPIO_WriteLow(LED_PORT, LED_PIN_0);
+	Delay(0xFFFFF);
+	GPIO_WriteLow(LED_PORT, LED_PIN_1);
+	Delay(0xFFFFF);
+	GPIO_WriteLow(LED_PORT, LED_PIN_2);
+	Delay(0xFFFFF);
+	GPIO_WriteLow(LED_PORT, LED_PIN_3);
+	Delay(0xFFFFF);
+	GPIO_Write(LED_PORT, 0xFF);
+	Delay(0xFFFFF);
+	Delay(0xFFFFF);
+	Delay(0xFFFFF);
+}
+
+
+
+void bin_to_led(int led){
+
+	((led & D0_MASK) >> 0) ? GPIO_WriteLow(LED_PORT, LED_PIN_0) : GPIO_WriteHigh(LED_PORT, LED_PIN_0);
+	((led & D1_MASK) >> 1) ? GPIO_WriteLow(LED_PORT, LED_PIN_1) : GPIO_WriteHigh(LED_PORT, LED_PIN_1);
+	((led & D2_MASK) >> 2) ? GPIO_WriteLow(LED_PORT, LED_PIN_2) : GPIO_WriteHigh(LED_PORT, LED_PIN_2);
+	((led & D3_MASK) >> 3) ? GPIO_WriteLow(LED_PORT, LED_PIN_3) : GPIO_WriteHigh(LED_PORT, LED_PIN_3);
+	
+}
+
+#ifdef USE_FULL_ASSERT
+
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *   where the assert_param error has occurred.
+  * @param file: pointer to the source file name
+  * @param line: assert_param error line source number
+  * @retval
+  * None
+  */
+void assert_failed(u8* file, u32 line)
+{
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+
+  /* Infinite loop */
+  while (1)
+  {}
+}
+#endif
+
+/**
+  * @}
+  */
+
+/******************* (C) COPYRIGHT 2009 STMicroelectronics *****END OF FILE****/
